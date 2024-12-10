@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  web:
+    depends_on:
+      - api
+    build: ./esercizio-1-front
+    ports:
+      - 3000:3000
+    environment:
+      - API_URL=http://api:3001
+
+    develop:
+      watch:
+        - path: ./esercizio-1-front/package.json
+          action: rebuild
+        - path: ./esercizio-1-front/package-lock.json
+          action: rebuild
+        - path: ./esercizio-1-front
+          target: /app
+          action: sync
+      
+  api:
+    depends_on:
+      - db
+    build: ./esercizio-1-api
+    ports:
+      - 3001:3001
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432 
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=esercizio1
+
+    develop:
+      watch:
+        - path: ./esercizio-1-api/package.json
+          action: rebuild
+        - path: ./esercizio-1-api/package-lock.json
+          action: rebuild
+        - path: ./esercizio-1-api
+          target: /app
+          action: sync
+
+  db:
+    image: postgres:13.4
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: esercizio1
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./esercizio1.sql:/docker-entrypoint-initdb.d/1.sql"
+
+volumes:
+  esercizio1:
